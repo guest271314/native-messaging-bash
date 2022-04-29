@@ -28,6 +28,7 @@ getMessage() {
   input=""
   datacount=0
   doublequotecount=0
+  
   # Loop forever, to deal with chrome.runtime.connectNative
   while true; do
     IFS= read -res -n1 data
@@ -35,9 +36,10 @@ getMessage() {
     if ((datacount++)); then
       if [ "$data" == "\"" ]; then
         if ((doublequotecount++)); then
+          input+="\\n$args "
           sendMessage "$input"
           # Disconnect host from connectNative client.
-          break
+          # break
         fi
         continue
       fi
@@ -52,4 +54,15 @@ getMessage() {
   done
 }
 
+getNativeMessagingHostArguments() {
+  # https://wiki.bash-hackers.org/commands/builtin/caller
+  local frame=0
+  while caller $frame; do
+    ((++frame));
+  done
+  return "$@"
+}
+
+args=`getNativeMessagingHostArguments`
+args+="\\n$@"
 getMessage
