@@ -4,7 +4,7 @@
 # How do I use a shell-script as Chrome Native Messaging host application
 # https://stackoverflow.com/a/24777120
 sendMessage() {
-  message=\"$1\"
+  message=\"$@\"
   # Calculate the byte size of the string.
   # NOTE: This assumes that byte length is identical to the string length!
   # Do not use multibyte (unicode) characters, escape them instead, e.g.
@@ -36,8 +36,13 @@ getMessage() {
     if ((datacount++)); then
       if [ "$data" == "\"" ]; then
         if ((doublequotecount++)); then
-          input+="\\n$args "
-          sendMessage "$input"
+          # input+="\\n$args "
+          array+="$input"
+          array+="\\n"
+          array+="$filename"
+          array+="\\n"
+          array+="$args"
+          sendMessage "${array[@]}"
           # Disconnect host from connectNative client.
           # break
         fi
@@ -63,6 +68,7 @@ getNativeMessagingHostArguments() {
   return "$@"
 }
 
-args=`getNativeMessagingHostArguments`
-args+="\\n$@"
+array=()
+filename=`getNativeMessagingHostArguments`
+args="$@"
 getMessage
