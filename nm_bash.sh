@@ -1,18 +1,11 @@
 #!/bin/bash
-# https://stackoverflow.com/a/24777120
-# Loop forever, to deal with chrome.runtime.connectNative
+set -x
 getMessage() {
-  read -N 1 uint32
-  # https://unix.stackexchange.com/a/13141
-  header=0x$(printf "%s" "$uint32" |
-  od -t x8 -An |
-  tr -dc '[:alnum:]')
-  messageLength=$(printf "%d" "$header")
-  array=()
-  read -N "$messageLength" json
-  array+=("$json")
-  sendMessage "${array[@]}"
+  length=$(head -q -z --bytes=4 -| od -An -td4 -)
+  message=$(head -q -z --bytes=$((length)) -)
+  sendMessage "$message"
 }
+# https://stackoverflow.com/a/24777120
 sendMessage() {
   message="$*"
   # Calculate the byte size of the string.
@@ -33,6 +26,11 @@ sendMessage() {
   printf "$(printf '\\x%x\\x%x\\x%x\\x%x' \
     $messagelen1 $messagelen2 $messagelen3 $messagelen4)%s" "$message"
 }
-while true; do
-  getMessage
-done
+
+main() {
+  while true; do
+    getMessage
+  done
+}
+
+main
