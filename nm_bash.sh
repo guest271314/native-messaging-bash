@@ -1,4 +1,5 @@
 #!/bin/bash
+# https://stackoverflow.com/a/24777120
 # Loop forever, to deal with chrome.runtime.connectNative
 getMessage() {
   read -N 1 uint32
